@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script>
+    ;(function(win, lib) {
+        var doc = win.document;
+        var docEl = doc.documentElement;
+        var metaEl = doc.querySelector('meta[name="viewport"]');
+        var flexibleEl = doc.querySelector('meta[name="flexible"]');
+        var dpr = 0;
+        var scale = 0;
+        var tid;
+        var flexible = lib.flexible || (lib.flexible = {});
+
+        if (metaEl) {
+            console.warn('将根据已有的meta标签来设置缩放比例');
+            var match = metaEl.getAttribute('content').match(/initial\-scale=([\d\.]+)/);
+            if (match) {
+                scale = parseFloat(match[1]);
+                dpr = parseInt(1 / scale);
+            }
+        } else if (flexibleEl) {
+            var content = flexibleEl.getAttribute('content');
+            if (content) {
+                var initialDpr = content.match(/initial\-dpr=([\d\.]+)/);
+                var maximumDpr = content.match(/maximum\-dpr=([\d\.]+)/);
+                if (initialDpr) {
+                    dpr = parseFloat(initialDpr[1]);
+                    scale = parseFloat((1 / dpr).toFixed(2));
+                }
+                if (maximumDpr) {
+                    dpr = parseFloat(maximumDpr[1]);
+                    scale = parseFloat((1 / dpr).toFixed(2));
+                }
+            }
+        }
+
+        if (!dpr && !scale) {
+            var isAndroid = win.navigator.appVersion.match(/android/gi);
+            var isIPhone = win.navigator.appVersion.match(/iphone/gi);
+            var devicePixelRatio = win.devicePixelRatio;
+            if (isIPhone) {
+                // iOS下，对于2和3的屏，用2倍的方案，其余的用1倍方案
+                if (devicePixelRatio >= 3 && (!dpr || dpr >= 3)) {
+                    dpr = 3;
+                } else if (devicePixelRatio >= 2 && (!dpr || dpr >= 2)){
+                    dpr = 2;
+                } else {
+                    dpr = 1;
+                }
+            } else {
+                // 其他设备下，仍旧使用1倍的方案
+                dpr = 1;
+            }
+            scale = 1 / dpr;
+        }
+
+        docEl.setAttribute('data-dpr', dpr);
+        if (!metaEl) {
+            metaEl = doc.createElement('meta');
+            metaEl.setAttribute('name', 'viewport');
+            metaEl.setAttribute('content', 'initial-scale=' + scale + ', maximum-scale=' + scale + ', minimum-scale=' + scale + ', user-scalable=no, viewport-fit=cover');
+            if (docEl.firstElementChild) {
+                docEl.firstElementChild.appendChild(metaEl);
+            } else {
+                var wrap = doc.createElement('div');
+                wrap.appendChild(metaEl);
+                doc.write(wrap.innerHTML);
+            }
+        }
+
+        function refreshRem(){
+            var width = docEl.getBoundingClientRect().width;
+            if (localStorage) {
+              if (width) {
+                localStorage.setItem('winw', width)
+              } else {
+                width = localStorage.getItem('winw')
+              }
+            }
+            //适配ipad
+            // if (width / dpr > 540) {
+            //     width = 540 * dpr;
+            // }
+            var rem = width / 10;
+            docEl.style.fontSize = rem + 'px';
+            //fix：华为荣耀、魅族m1 note、三星Note4等手机内置webview会自动对设置的font-size乘一个系数，导致页面偏大（Font Boosting）
+            var effectSize = parseFloat(getComputedStyle(docEl).fontSize);
+            if (effectSize != rem) {
+              docEl.style.fontSize = rem*rem/effectSize + 'px';
+            }
+            flexible.rem = win.rem = rem;
+        }
+
+        win.addEventListener('resize', function() {
+            clearTimeout(tid);
+            tid = setTimeout(refreshRem, 300);
+        }, false);
+        win.addEventListener('pageshow', function(e) {
+            if (e.persisted) {
+                clearTimeout(tid);
+                tid = setTimeout(refreshRem, 300);
+            }
+        }, false);
+
+        if (doc.readyState === 'complete') {
+            doc.body.style.fontSize = 12 * dpr + 'px';
+        } else {
+            doc.addEventListener('DOMContentLoaded', function(e) {
+                doc.body.style.fontSize = 12 * dpr + 'px';
+            }, false);
+        }
+
+        refreshRem();
+
+        flexible.dpr = win.dpr = dpr;
+        flexible.refreshRem = refreshRem;
+        flexible.rem2px = function(d) {
+            var val = parseFloat(d) * this.rem;
+            if (typeof d === 'string' && d.match(/rem$/)) {
+                val += 'px';
+            }
+            return val;
+        }
+        flexible.px2rem = function(d) {
+            var val = parseFloat(d) / this.rem;
+            if (typeof d === 'string' && d.match(/px$/)) {
+                val += 'rem';
+            }
+            return val;
+        }
+    })(window, window['lib'] || (window['lib'] = {}));
+  </script>
+  <style type="text/css">
+    /*reset*/
+    body {
+        -webkit-user-select: none;
+        -webkit-text-size-adjust: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    body {
+        font-family: "PingFang SC", sans-serif;
+        color: #333;
+    }
+
+    body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td, hr, button, article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+        padding: 0;
+        margin: 0;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    i, em {
+        font-style: normal;
+    }
+
+    h1, h2, h3, h4, h5 {
+        font-weight: normal;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    fieldset, img {
+        border: 0;
+    }
+
+    button, input, textarea {
+        font-family: inherit;
+        font-size: inherit;
+        outline: 0;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    .strecth{
+      height: 6000px;
+    }
+
+    /*footer*/
+    .yp-footer {
+        box-sizing: border-box;
+        position: fixed;
+        background-color: #fff;
+        box-shadow: 0 0 .66667rem #c9ccd5;
+        z-index: 99;
+        -webkit-transition: height .3s linear;
+    }
+
+    .yp-footer,.yp-footer-bg {
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        background-size: 100%;
+        background-position: 0 0;
+        background-repeat: no-repeat
+    }
+
+    .yp-footer-wrap {
+        height: 1.30667rem;
+        padding: 0 .53333rem;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        justify-content: space-between;
+        transition: all .1s linear
+    }
+
+    .yp-footer-item,.yp-footer-wrap {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-align: end;
+        -webkit-align-items: flex-end;
+        align-items: flex-end
+    }
+
+    .yp-footer-item {
+        height: 100%;
+        min-width: 1.30667rem;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        background-repeat: no-repeat;
+        background-position: top;
+        background-size: auto 100%;
+        position: relative;
+        z-index: 2
+    }
+
+    .yp-footer-item.big {
+        width: 1.6rem;
+        height: 2rem
+    }
+
+    .yp-footer-item .text {
+        display: block;
+        margin-bottom: .10667rem;
+        font-size: .24rem
+    }
+
+    .fix-iphonex-bottom .yp-footer-wrap{
+      padding-bottom: 0.91rem
+    }
+  </style>
+</head>
+<body>
+  <div class="strecth"></div>
+  <nav class="yp-footer">
+    <ul class="yp-footer-wrap">
+      <li class="yp-footer-item" style="color: rgb(148, 157, 168); background-image: url(&quot;//zzpic3.58cdn.com.cn/zhuanzh/n_v23492f010e84442c2b98ff791dd91454d.png&quot;);">
+        <span class="text">放心买</span></li>
+      <li class="yp-footer-item" style="color: rgb(148, 157, 168); background-image: url(&quot;//zzpic3.58cdn.com.cn/zhuanzh/n_v2be6be81767844e0b8bf55aa0b8e86e53.png&quot;);">
+        <span class="text">买家秀</span></li>
+      <li class="yp-footer-item big" style="color: rgb(148, 157, 168); background-image: url(&quot;//zzpic3.58cdn.com.cn/zhuanzh/n_v206840dfc4ac3487a8954007e81283ca7.png&quot;);">
+        <span class="text">手机估价</span></li>
+      <li class="yp-footer-item" style="color: rgb(148, 157, 168); background-image: url(&quot;//zzpic3.58cdn.com.cn/zhuanzh/n_v2b46052803807423fa39c02d0bcfa6de6.png&quot;);">
+        <span class="text">我的订单</span></li>
+      <li class="yp-footer-item" style="color: rgb(148, 157, 168); background-image: url(&quot;//zzpic3.58cdn.com.cn/zhuanzh/n_v293e2db7647de4a31afea13d49dcb88cb.png&quot;);">
+        <span class="text">帮助中心</span></li>
+    </ul>
+  </nav>
+  <script>
+    var isIphoneX = window.devicePixelRatio && window.devicePixelRatio === 3 && window.screen.width === 375 && testUA('iPhone')
+    // 处理lib-flexible放大viewport的情况
+    var scale = window.innerWidth / window.screen.width
+
+    if (isIphoneX) {
+      check()
+      window.onscroll = throttle(check, 200)
+    }
+    function check () {
+      // 100为经验值
+      // alert(window.screen.height - window.innerHeight / scale)
+      if (window.screen.height - window.innerHeight / scale < 100) {
+        document.body.classList.add('fix-iphonex-bottom')
+      } else {
+        document.body.classList.remove('fix-iphonex-bottom')
+      }
+    }
+    function testUA (str) {
+      return navigator.userAgent.indexOf(str) > -1
+    }
+    function throttle (func, wait) {
+      var ctx, args, rtn, timeoutID; // caching
+      var last = 0;
+
+      return function throttled () {
+        ctx = this;
+        args = arguments;
+        var delta = new Date() - last;
+        if (!timeoutID)
+          if (delta >= wait) call();
+          else timeoutID = setTimeout(call, wait - delta);
+        return rtn;
+      };
+
+      function call () {
+        timeoutID = 0;
+        last = +new Date();
+        rtn = func.apply(ctx, args);
+        ctx = null;
+        args = null;
+      }
+    }
+  </script>
+</body>
+</html>

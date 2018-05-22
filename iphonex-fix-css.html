@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <script>
+    var doc = document,
+        docEl = doc.documentElement,
+        metaEl = doc.querySelector('meta[name="viewport"]'),
+        tid;
+    // 刷新REM
+    function refreshRem() {
+        var width = docEl.getBoundingClientRect().width;
+
+        var fontSize = width / 320 * 16;
+        docEl.style.fontSize = fontSize + 'px';
+
+        var effectSize = parseFloat(getComputedStyle(docEl).fontSize);
+        if (effectSize != fontSize) //fix：华为荣耀、魅族m1 note、三星Note4等手机内置webview会自动对设置的font-size乘一个系数，导致页面偏大（Font Boosting）
+            docEl.style.fontSize = fontSize*fontSize/effectSize + 'px';
+    }
+    function createViewport() {
+        var scale = 1;
+        metaEl = doc.createElement('meta');
+        metaEl.setAttribute('name', 'viewport');
+        metaEl.setAttribute('content', 'initial-scale=' + scale + ', maximum-scale=' + scale + ', minimum-scale=' + scale + ', user-scalable=no, viewport-fit=cover');
+        docEl.firstElementChild.appendChild(metaEl);
+    }
+
+    createViewport();
+    refreshRem();
+    window.addEventListener('resize', function () {
+        clearTimeout(tid);
+        tid = setTimeout(refreshRem, 100);
+    }, false);
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            clearTimeout(tid);
+            tid = setTimeout(refreshRem, 100);
+        }
+    }, false);
+  </script>
+  <style type="text/css">
+    /*reset*/
+    body,dd,dl,dt,li,ul{margin:0;padding:0}body{min-height:100%;color:#000;font-family:sans-serif;-webkit-overflow-scrolling:touch}li{list-style-type:none}a{color:#000;text-decoration:none}div,form,html,li,p,span,ul{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}html{height:100%;-webkit-tap-highlight-color:transparent;font-family:microsoft yahei,Helvetica Neue,Helvetica,Arial,sans-serif}em,i{font-style:normal}.toast-tip[data-v-aed4af6a]{width:9.33333333rem;padding:.66666667rem;border-radius:.53333333rem;background-color:#000;opacity:.9;position:fixed;top:50%;left:50%;margin-left:-5.33333333rem;margin-top:-3.2rem;z-index:1000}.toast-tip p[data-v-aed4af6a]{width:100%;height:auto;color:#fff;font-size:.69333333rem;text-align:center;line-height:1.2rem;margin:0}
+    
+    .strecth{
+      height: 2000px;
+    }
+
+    /*footer*/
+    .navi[data-v-539b7842] {
+      background-color: #ffffff;
+      white-space: nowrap;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 3.04rem;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 99;
+    }
+    .navi-gradient[data-v-539b7842] {
+      opacity: 0.4;
+      background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(242, 243, 244, 0)), to(#e1e2e5));
+      background-image: linear-gradient(-180deg, rgba(242, 243, 244, 0) 0%, #e1e2e5 100%);
+      height: 0.42666667rem;
+    }
+    .navi-list[data-v-539b7842] {
+      /*background-color: #ffffff;*/
+      height: 2.61333333rem;
+      position: relative;
+      z-index: 1;
+    }
+    .navi-item[data-v-539b7842] {
+      position: relative;
+      width: 3.73333333rem;
+      height: 2.61333333rem;
+      display: inline-block;
+      vertical-align: top;
+      text-align: center;
+      padding-top: 0.26666667rem;
+      -webkit-box-sizing: border-box;
+              box-sizing: border-box;
+    }
+    .navi-item-icon[data-v-539b7842] {
+      display: inline-block;
+      width: 0.85333333rem;
+      height: 0.85333333rem;
+      background-position: center;
+      background-size: contain;
+    }
+    .navi-item-icon.publish[data-v-539b7842] {
+      width: 3.46666667rem;
+      height: 3.46666667rem;
+      margin-top: -2.53333333rem;
+    }
+    .navi-item-name[data-v-539b7842] {
+      font-size: 0.48rem;
+      color: #949da8;
+      letter-spacing: 0;
+      line-height: 0.48rem;
+    }
+    .navi-item-name.sel[data-v-539b7842] {
+      color: #ee664b;
+    }
+    .navi-item-server[data-v-539b7842] {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="strecth"></div>
+  <section data-v-539b7842="" data-v-2458d326="" class="navi">
+    <section data-v-539b7842="" class="navi-gradient"></section>
+    <section data-v-539b7842="" class="navi-list">
+      <div data-v-7c138d0e="" data-v-539b7842="" class="custom navi-item">
+        <div data-v-539b7842="" data-v-7c138d0e="">
+          <span data-v-539b7842="" data-v-7c138d0e="" class="navi-item-icon" style="background-image: url(https://img.58cdn.com.cn/zhuanzhuan/ZZOpenBusiness/static/img/gamerent2.0/service.png);"></span>
+          <div data-v-539b7842="" data-v-7c138d0e="" class="navi-item-name">联系客服</div></div>
+      </div>
+      <a data-v-539b7842="" class="navi-item">
+        <span data-v-539b7842="" class="navi-item-icon" style="background-image: url(https://img.58cdn.com.cn/zhuanzhuan/ZZOpenBusiness/static/img/gamerent2.0/list.png);"></span>
+        <div data-v-539b7842="" class="navi-item-name">全部游戏</div></a>
+      <a data-v-539b7842="" href="javascript:;" class="navi-item">
+        <span data-v-539b7842="" class="navi-item-icon publish" style="background-image: url(https://img.58cdn.com.cn/zhuanzhuan/ZZOpenBusiness/static/img/gamerent2.0/pub.png);"></span>
+        <div data-v-539b7842="" class="navi-item-name">发布赚钱</div></a>
+      <a data-v-539b7842=""  class="navi-item">
+        <span data-v-539b7842="" class="navi-item-icon" style="background-image: url(https://img.58cdn.com.cn/zhuanzhuan/ZZOpenBusiness/static/img/gamerent2.0/tools.png);"></span>
+        <div data-v-539b7842="" class="navi-item-name">缴/退保证金</div></a>
+      <a data-v-539b7842="" href="javascript:;" class="navi-item">
+        <span data-v-539b7842="" class="navi-item-icon" style="background-image: url(https://img.58cdn.com.cn/zhuanzhuan/ZZOpenBusiness/static/img/gamerent2.0/mainpage.png);"></span>
+        <div data-v-539b7842="" class="navi-item-name">我的订单</div></a>
+    </section>
+  </section>
+</body>
+</html>
